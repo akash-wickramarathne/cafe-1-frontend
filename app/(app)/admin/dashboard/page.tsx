@@ -1,0 +1,122 @@
+"use client";
+import { useState, useEffect } from "react";
+import { useNotification } from "@/app/_contexts/NotificationContext";
+import AdminLayout from "../layout";
+import { useToast } from "@/components/ui/use-toast";
+import axios from "@/lib/axios";
+import SingleStatic from "@/components/admins/SingleStatic";
+import SingleStaticRow from "@/components/admins/SingleRowStatic";
+import BestSellingProducts from "@/components/admins/SingleRowStatic";
+
+const AdminDashboardPage = () => {
+  const { showNotification } = useNotification();
+  const { toast } = useToast();
+
+  // Define states to hold the data
+  const [clientCount, setClientCount] = useState<number | null>(null);
+  const [orderCount, setOrderCount] = useState<number | null>(null);
+  const [productCount, setProductCount] = useState<number | null>(null);
+  const [waiterCount, setWaiterCount] = useState<number | null>(null);
+  const [tableCount, setTableCount] = useState<number | null>(null);
+  const [foodCategoryCount, setFoodCategoryCount] = useState<number | null>(
+    null
+  );
+  const [bestSellingProduct, setBestSellingProduct] = useState([]);
+  const [ordersPayAmount, setOrdersPayAmount] = useState<number | null>(null);
+
+  // Function to fetch data from the APIs
+  const fetchData = async () => {
+    try {
+      const [
+        clientResponse,
+        orderResponse,
+        productResponse,
+        waiterResponse,
+        tableResponse,
+        foodCategoryResponse,
+        ordersPayResponse,
+        bestSellingProductResponse,
+      ] = await Promise.all([
+        axios.get("/api/admin/dashboard/count/clients"),
+        axios.get("/api/admin/dashboard/count/orders"),
+        axios.get("/api/admin/dashboard/count/products"),
+        axios.get("/api/admin/dashboard/count/waiters"),
+        axios.get("/api/admin/dashboard/count/tables"),
+        axios.get("/api/admin/dashboard/count/foodCategories"),
+        axios.get("/api/admin/dashboard/amount/orders"),
+        axios.get("/api/get/best-selling/product"),
+      ]);
+
+      // Set state with the fetched data
+      setClientCount(clientResponse.data.data);
+      setOrderCount(orderResponse.data.data);
+      setProductCount(productResponse.data.data);
+      setWaiterCount(waiterResponse.data.data);
+      setTableCount(tableResponse.data.data);
+      setFoodCategoryCount(foodCategoryResponse.data.data);
+      setOrdersPayAmount(ordersPayResponse.data.data);
+      setBestSellingProduct(bestSellingProduct.data.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      showNotification("error", "Failed to fetch dashboard data.");
+    }
+  };
+
+  // Fetch data when the component mounts
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Handler for button click (for notification)
+  const handleClick = () => {
+    showNotification("success", "This is a notification message!");
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Pass values to SingleStatic component */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+        <SingleStatic
+          title="Clients Count"
+          data={clientCount ?? "Loading..."}
+          className="p-4 bg-white shadow rounded"
+          imageSrc="/admin/static1.jpg"
+        />
+        <SingleStatic
+          title="Product Count"
+          data={productCount ?? "Loading..."}
+          className="p-4 bg-white shadow rounded"
+        />
+        <SingleStatic
+          title="Orders Payment Amount"
+          data={`$${ordersPayAmount ?? "Loading..."}`}
+          className="p-4 bg-white shadow rounded"
+        />
+      </div>
+
+      <div className="grid grid-cols-1">
+        <BestSellingProducts />
+      </div>
+
+      {/* <button
+        onClick={handleClick}
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+      >
+        Show Notification
+      </button>
+
+      <div>
+        <h2 className="text-2xl font-bold">Dashboard Data</h2>
+        <p>Clients Count: {clientCount ?? "Loading..."}</p>
+        <p>Orders Count: {orderCount ?? "Loading..."}</p>
+        <p>Products Count: {productCount ?? "Loading..."}</p>
+        <p>Waiters Count: {waiterCount ?? "Loading..."}</p>
+        <p>Tables Count: {tableCount ?? "Loading..."}</p>
+        <p>Food Categories Count: {foodCategoryCount ?? "Loading..."}</p>
+        <p>Orders Payment Amount: ${ordersPayAmount ?? "Loading..."}</p>
+      </div> */}
+    </div>
+  );
+};
+
+export default AdminDashboardPage;
