@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "@/lib/axios";
+import Lottie from "lottie-react";
+import animationData from "../../../public/payment/payment-success.json";
+import { Button } from "@/components/ui/button";
 
 const PaymentPage = () => {
   const router = useRouter();
@@ -59,7 +62,23 @@ const PaymentPage = () => {
     // };
   }, [router]);
 
-  return <div>PaymentPage</div>;
+  return (
+    <div className="flex justify-center items-center  min-h-screen">
+      <div className="bg-white rounded-lg shadow-md flex flex-col items-center p-4 ">
+        <Lottie animationData={animationData} className=" w-1/3" loop={true} />
+        <h1 className="text-3xl font-bold mb-4 animate-pulse text-green-500 ">
+          Payment SuccessFully
+        </h1>
+        <Button
+          onClick={() => {
+            router.push("/search");
+          }}
+        >
+          Back to Shop
+        </Button>
+      </div>
+    </div>
+  );
 };
 
 export default PaymentPage;

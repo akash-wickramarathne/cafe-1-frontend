@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 const BookTablePage = () => {
   const router = useRouter();
   const today = new Date();
+
   const [formData, setFormData] = useState({
     date: today.toISOString().split("T")[0], // Set default date to today
     start_time: "",
@@ -56,7 +57,7 @@ const BookTablePage = () => {
     }
   };
 
-  const checkAvaibleBookTables = async (formData:any) => {
+  const checkAvaibleBookTables = async (formData: any) => {
     const response = await axios.post(
       "/api/check-availability/table",
       formData

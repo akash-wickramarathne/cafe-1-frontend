@@ -1,20 +1,25 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation"; // Use only useSearchParams
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "@/lib/axios";
 import { useNotification } from "@/app/_contexts/NotificationContext";
 import { cartSchema } from "@/schemas";
 import { AddorUpdateCart } from "@/app/api/addorUpdateCart";
 import { z } from "zod";
+import Image from "next/image";
+import { useAuth } from "@/hooks/auth";
+import { Button } from "@/components/ui/button";
 
 const SingleProductPage = () => {
   const searchParams = useSearchParams();
-  const productId = searchParams.get("product_id"); // Get the product_id from the search params
+  const productId = searchParams.get("product_id");
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [totalPrice, setTotalPrice] = useState(0);
   const { showNotification } = useNotification();
   const router = useRouter();
+  const { user } = useAuth({ middleware: "guest" });
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -24,20 +29,29 @@ const SingleProductPage = () => {
             `/api/get/products?product_id=${productId}`
           );
           if (response.data.success) {
-            setProduct(response.data.data); // Assuming your API response structure contains 'data'
+            setProduct(response.data.data);
+            setTotalPrice(response.data.data.price); // Set initial total price here
           } else {
             console.error("Product not found:", response.data.message);
-            // Optionally, redirect to a 404 page or show a message
           }
         } catch (error) {
           console.error("Error fetching product:", error);
-          // Optionally, redirect to a 404 page or show a message
         }
       }
     };
-
     fetchProduct();
   }, [productId]);
+
+  useEffect(() => {
+    if (!productId) {
+      router.back();
+    }
+    // Check if product is not null before accessing its price
+    if (product) {
+      setTotalPrice(product.price * quantity); // Update total price whenever quantity or product changes
+      //alert(totalPrice);
+    }
+  }, [product, quantity]); // Add product as a dependency here
 
   const handleQuantityChange = (amount) => {
     setQuantity((prevQuantity) => Math.max(1, prevQuantity + amount));
@@ -45,11 +59,11 @@ const SingleProductPage = () => {
 
   const handleAddToCart = () => {
     console.log(`Added ${quantity} of ${product.name} to cart.`);
+    addToCart(product.id, quantity);
   };
 
   const handleBuyNow = () => {
-    // Navigate to the checkout page with the product ID
-    router.push(`/checkout?product_ids=${productId}`); // Change the URL as needed
+    router.push(`/checkout?product_ids=${productId}&quantity=${quantity}`);
   };
 
   if (!product) {
@@ -58,18 +72,13 @@ const SingleProductPage = () => {
 
   const addToCart = async (productId: string, quantity: number) => {
     const data = {
-      product_id: productId.toString(), // Ensure the type matches schema expectations
+      product_id: productId.toString(),
       cart_qty: quantity,
-      user_id: user?.id.toString(), // Ensure the type matches schema expectations
+      user_id: user?.id.toString(),
     };
 
-    console.log("Data to be validated:", data);
-
     try {
-      // Validate data
       await cartSchema.parseAsync(data);
-
-      // Proceed with API call
       const result = await AddorUpdateCart(data);
 
       if (result?.success) {
@@ -78,30 +87,21 @@ const SingleProductPage = () => {
           result.message || "Cart updated successfully"
         );
       } else {
-        // Handle API response indicating failure
         showNotification("error", result?.message || "An error occurred");
       }
-
-      console.log("Cart update result:", result);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        // Handle validation errors
         console.error("Validation Error:", error.errors);
         showNotification(
           "error",
           "Invalid data provided. Please check your input."
         );
-      } else if (error instanceof Error) {
-        // Handle generic errors
+      } else {
         console.error("Error adding to cart:", error.message);
         showNotification(
           "error",
           "An unexpected error occurred. Please try again."
         );
-      } else {
-        // Handle unexpected error types
-        console.error("Unknown error:", error);
-        showNotification("error", "An unknown error occurred.");
       }
     }
   };
@@ -110,45 +110,60 @@ const SingleProductPage = () => {
     <div className="container mx-auto p-4">
       <div className="flex flex-col md:flex-row items-center">
         <div className="w-full md:w-1/2 p-4">
-          <img
-            src={`http://localhost:8000/storage/${product.foodImages[0]}`} // Adjust based on your image URL structure
+          <Image
+            src={`http://localhost:8000/storage/${product.foodImages[0]}`}
             alt={product.name}
-            className="w-full h-auto rounded-lg shadow-lg"
+            quality="100"
+            width={1000}
+            height={1000}
+            className="rounded-lg shadow-lg"
           />
         </div>
-        <div className="w-full md:w-1/2 p-4">
-          <h1 className="text-2xl font-bold mb-4">{product.name}</h1>
-          <p className="text-gray-700 mb-4">{product.description}</p>
-          <h3 className="">Rs. {product.price}</h3>
-          <div className="flex items-center mb-4">
-            <button
-              onClick={() => handleQuantityChange(-1)}
-              className="px-3 py-2 bg-gray-200 rounded-l-lg"
-            >
-              -
-            </button>
-            <span className="px-4 py-2 bg-gray-100">{quantity}</span>
-            <button
-              onClick={() => handleQuantityChange(1)}
-              className="px-3 py-2 bg-gray-200 rounded-r-lg"
-            >
-              +
-            </button>
-          </div>
-          <div className="flex space-x-4">
-            {/* <button
-              onClick={handleAddToCart}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-            >
-              Add to Cart
-            </button> */}
+        <div className="flex flex-col w-full md:w-1/2">
+          <div className="flex flex-col gap-y-10">
+            <div>
+              <h1 className="text-5xl font-bold mb-4">{product.name}</h1>
+              <p className="text-gray-700 mb-4">{product.description}</p>
+            </div>
+            <div>
+              <div className="flex flex-col gap-y-10">
+                <p className="text-6xl">Rs. {totalPrice}</p>
+                <div className="flex items-center mb-4">
+                  <button
+                    onClick={() => handleQuantityChange(-1)}
+                    className=" px-10 py-6 bg-gray-300 rounded-l-lg text-3xl hover:bg-gray-400 transition duration-200"
+                  >
+                    -
+                  </button>
+                  <span className=" px-14 py-6 bg-gray-200 text-3xl font-semibold">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => handleQuantityChange(1)}
+                    className="px-10 py-6 bg-gray-300 rounded-r-lg text-3xl hover:bg-gray-400 transition duration-200"
+                  >
+                    +
+                  </button>
+                </div>
 
-            <button
-              onClick={handleBuyNow}
-              className="px-4 py-2 bg-green-500 text-white rounded-lg"
-            >
-              Buy Now
-            </button>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    disabled={product.stock < 1}
+                    onClick={handleAddToCart}
+                    className="px-4 py-10 bg-blue-500 text-white rounded-lg"
+                  >
+                    Add to Cart
+                  </Button>
+
+                  <Button
+                    onClick={handleBuyNow}
+                    className="px-4 py-10 bg-green-500 text-white rounded-lg"
+                  >
+                    Buy Now
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -157,99 +172,3 @@ const SingleProductPage = () => {
 };
 
 export default SingleProductPage;
-
-// "use client";
-
-// import React, { useEffect, useState } from "react";
-// import { useRouter, useSearchParams } from "next/navigation";
-// import axios from "@/lib/axios";
-
-// const SingleProductPage = () => {
-//   const searchParams = useSearchParams();
-//   const productId = searchParams.get("product_id");
-//   const [product, setProduct] = useState(null);
-//   const [quantity, setQuantity] = useState(1);
-
-//   useEffect(() => {
-//     if (productId) {
-//       const fetchProduct = async () => {
-//         try {
-//           const response = await axios.get(
-//             `/api/get/products?product_id=${productId}`
-//           );
-//           setProduct(response.data);
-//         } catch (error) {
-//           console.error("Product not found:", error);
-//           //  router.push("/404"); // Navigate to 404 page if product not found
-//         }
-//       };
-
-//       fetchProduct();
-//     }
-//   }, [productId, productId]);
-
-//   const handleQuantityChange = (amount) => {
-//     setQuantity((prevQuantity) => Math.max(1, prevQuantity + amount));
-//   };
-
-//   const handleAddToCart = () => {
-//     console.log(`Added ${quantity} of ${product.name} to cart.`);
-//   };
-
-//   const handleBuyNow = () => {
-//     console.log(`Bought ${quantity} of ${product.name}.`);
-//   };
-
-//   if (!product) {
-//     return <div>Loading...</div>;
-//   }
-
-//   return (
-//     <div className="container mx-auto p-4">
-//       <div className="flex flex-col md:flex-row items-center">
-//         <div className="w-full md:w-1/2 p-4">
-//           <img
-//             src={`http://localhost:8000/store/product/${product.image}`} // Adjust this based on your image URL structure
-//             alt={product.name}
-//             className="w-full h-auto rounded-lg shadow-lg"
-//           />
-//         </div>
-//         <div className="w-full md:w-1/2 p-4">
-//           <h1 className="text-2xl font-bold mb-4">{product.name}</h1>
-//           <p className="text-gray-700 mb-4">{product.description}</p>
-//           <div className="flex items-center mb-4">
-//             <button
-//               onClick={() => handleQuantityChange(-1)}
-//               className="px-3 py-2 bg-gray-200 rounded-l-lg"
-//             >
-//               -
-//             </button>
-//             <span className="px-4 py-2 bg-gray-100">{quantity}</span>
-//             <button
-//               onClick={() => handleQuantityChange(1)}
-//               className="px-3 py-2 bg-gray-200 rounded-r-lg"
-//             >
-//               +
-//             </button>
-//           </div>
-//           <div className="flex space-x-4">
-//             <button
-//               onClick={handleAddToCart}
-//               className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-//             >
-//               Add to Cart
-//             </button>
-//             <button
-//               onClick={handleBuyNow}
-//               className="px-4 py-2 bg-green-500 text-white rounded-lg"
-//             >
-//               Buy Now
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default SingleProductPage;
