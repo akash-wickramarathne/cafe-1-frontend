@@ -76,7 +76,7 @@ const AdminDashboardPage = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animated fadeInDown  ">
       {/* Pass values to SingleStatic component */}
       <div className="grid grid-cols-4 gap-4 w-full">
         <SingleStatic

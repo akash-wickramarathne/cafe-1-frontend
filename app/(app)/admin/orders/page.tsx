@@ -31,6 +31,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useNotification } from "@/app/_contexts/NotificationContext";
+import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { SkeletonSm } from "@/components/common/SkeletonSm";
 
 export type OrdersTable = {
   id: string;
@@ -54,6 +60,12 @@ export default function DataTableDemo() {
   const [selectedWaiter, setSelectedWaiter] = useState<number | null>(null);
   const [selectedTable, setSelectedTable] = useState<BookedTable | null>(null);
   const { showNotification } = useNotification();
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const handleGoToOrderItems = (order: BookedTable) => {
+    router.push(`orders/${order.id}`);
+  };
 
   const fetchOrders = async () => {
     try {
@@ -67,8 +79,12 @@ export default function DataTableDemo() {
           email: table.user.email,
           status: table.status.order_status_name,
           amount: table.total_amount,
+          dateTime: formatDate(table.created_at),
         }));
         setData(fetchedOrders);
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
       } else {
         console.error("Failed to fetch tables:", data.message);
       }
@@ -83,27 +99,52 @@ export default function DataTableDemo() {
 
   return (
     <>
-      <Table>
-        <TableCaption>A list of your recent invoices.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Id</TableHead>
-            <TableHead className="w-[100px]">Email</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((table) => (
-            <TableRow key={table.id}>
-              <TableCell className="font-medium">{table.id}</TableCell>
-              <TableCell className="font-medium">{table.email}</TableCell>
-              <TableCell className="flex gap-4">{table.status}</TableCell>
-              <TableCell className="text-right">${table.amount}</TableCell>
+      {loading ? (
+        <div className="">
+          <SkeletonSm length={8} />
+        </div>
+      ) : (
+        <Table className=" animated fadeInDown ">
+          <TableCaption>A list of your recent Orders.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead></TableHead>
+              <TableHead>Id</TableHead>
+              <TableHead className="">Email</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="">Amount</TableHead>
+              <TableHead className="text-right">Date</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody className="">
+            {data.map((table) => (
+              <TableRow
+                key={table.id}
+                className="bg-white items-center justify-between w-full cursor-pointer  "
+                onClick={() => {
+                  handleGoToOrderItems(table);
+                }}
+              >
+                <TableCell>
+                  <Image
+                    src="/admin/order-1.jpg"
+                    alt={table.id.toString()}
+                    width={100}
+                    height={100}
+                  />
+                </TableCell>
+                <TableCell className="font-medium">{table.id}</TableCell>
+                <TableCell className="">{table.email}</TableCell>
+                <TableCell className="font-medium">
+                  <Badge className="cursor-pointer"> {table.status}</Badge>
+                </TableCell>
+                <TableCell className="">${table.amount}</TableCell>
+                <TableCell className="text-right">{table.dateTime}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </>
   );
 }
