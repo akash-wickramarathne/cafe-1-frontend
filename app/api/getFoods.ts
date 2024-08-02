@@ -15,3 +15,15 @@ export const getFoods = async () => {
     throw error;
   }
 };
+
+export const getProductDetails = async (productId: string) => {
+  try {
+    const response = await axios.get(
+      `/api/get/products?product_id=${productId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch product details:", error);
+    throw error;
+  }
+};

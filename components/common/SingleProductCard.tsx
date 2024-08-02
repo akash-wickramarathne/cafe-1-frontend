@@ -12,21 +12,118 @@ import {
 import { ProductCarousel } from "./ProductCarousel";
 import { useRouter } from "next/navigation";
 
+// export const SingleProductCard = ({
+//   product,
+//   handleCartClick,
+//   handleWishslitClick,
+// }: {
+//   product: Product;
+//   handleCartClick?: (quantity: number) => void;
+//   handleWishslitClick?: () => void;
+//   // Updated to accept quantity
+// }) => {
+//   const navigate = useRouter();
+//   const handleAddToCart = () => {
+//     // Assuming a fixed quantity for demonstration. Adjust as needed.
+//     const quantity = 1;
+//     handleCartClick(quantity);
+//   };
+
+//   const handleGoToSingleProduct = () => {
+//     navigate.push(`/product?product_id=${product.id}`);
+//   };
+
+//   const handleWishlist = () => {
+//     handleWishslitClick();
+//   };
+
+//   const truncateText = (text, maxLength) => {
+//     if (text.length <= maxLength) {
+//       return text;
+//     }
+//     return text.substring(0, maxLength) + "...";
+//   };
+
+//   return (
+//     <Card className="flex flex-col">
+//       {/* Carousel at the top */}
+//       <CardHeader
+//         className="p-2 flex justify-center items-center"
+//         onClick={handleGoToSingleProduct}
+//       >
+//         <ProductCarousel productImages={product.foodImages} />
+//       </CardHeader>
+
+//       {/* Product details */}
+//       <CardContent className="flex-1 flex flex-col p-4">
+//         {/* Product Name */}
+//         <CardTitle
+//           className="text-lg font-semibold mb-2"
+//           onClick={handleGoToSingleProduct}
+//         >
+//           {product.name}
+//         </CardTitle>
+
+//         {/* Product Description */}
+//         <div
+//           className="flex-1 mb-2 overflow-hidden"
+//           onClick={handleGoToSingleProduct}
+//         >
+//           <p className="text-sm text-gray-700">
+//             {truncateText(product.description, 150)}
+//           </p>
+//         </div>
+
+//         {/* Product Price */}
+//         <div
+//           className="text-lg font-semibold mb-4"
+//           onClick={handleGoToSingleProduct}
+//         >
+//           ${product.price.toFixed(2)}
+//         </div>
+
+//         <Button
+//           className="w-full bg-blue-500 "
+//           onClick={handleAddToCart}
+//           disabled={product.stock < 1}
+//         >
+//           Add to Cart
+//         </Button>
+//         <Button
+//           className="w-full mt-2 bg-green-600 hover:bg-green-800 "
+//           onClick={handleWishslitClick}
+//           //   disabled={product.stock == 0}
+//         >
+//           Add to Wishlist
+//         </Button>
+//       </CardContent>
+//     </Card>
+//   );
+// };
 export const SingleProductCard = ({
   product,
   handleCartClick,
   handleWishslitClick,
+  handleEditClick,
 }: {
   product: Product;
-  handleCartClick: (quantity: number) => void;
-  handleWishslitClick: () => void;
-  // Updated to accept quantity
+  handleCartClick?: (quantity: number) => void;
+  handleWishslitClick?: () => void;
+  handleEditClick?: () => void;
 }) => {
   const navigate = useRouter();
+
   const handleAddToCart = () => {
-    // Assuming a fixed quantity for demonstration. Adjust as needed.
-    const quantity = 1;
-    handleCartClick(quantity);
+    if (handleCartClick) {
+      const quantity = 1; // Adjust the quantity as needed
+      handleCartClick(quantity);
+    }
+  };
+
+  const gotoEditPage = () => {
+    if (handleEditClick) {
+      handleEditClick();
+    }
   };
 
   const handleGoToSingleProduct = () => {
@@ -34,10 +131,12 @@ export const SingleProductCard = ({
   };
 
   const handleWishlist = () => {
-    handleWishslitClick();
+    if (handleWishslitClick) {
+      handleWishslitClick();
+    }
   };
 
-  const truncateText = (text, maxLength) => {
+  const truncateText = (text: string, maxLength: number) => {
     if (text.length <= maxLength) {
       return text;
     }
@@ -79,23 +178,37 @@ export const SingleProductCard = ({
           className="text-lg font-semibold mb-4"
           onClick={handleGoToSingleProduct}
         >
-          ${product.price.toFixed(2)}
+          Rs. {product.price.toFixed(2)}
         </div>
+        {handleCartClick && (
+          <Button
+            className="w-full bg-blue-500"
+            onClick={handleAddToCart}
+            disabled={product.stock < 1}
+          >
+            {" "}
+            Add to Cart
+          </Button>
+        )}
 
-        <Button
-          className="w-full bg-blue-500 "
-          onClick={handleAddToCart}
-          disabled={product.stock < 1}
-        >
-          Add to Cart
-        </Button>
-        <Button
-          className="w-full mt-2 bg-green-600 hover:bg-green-800 "
-          onClick={handleWishslitClick}
-          //   disabled={product.stock == 0}
-        >
-          Add to Wishlist
-        </Button>
+        {handleWishslitClick && (
+          <Button
+            className="w-full mt-2 bg-green-600 hover:bg-green-800"
+            onClick={handleWishlist}
+          >
+            Add to Wishlist
+          </Button>
+        )}
+        {handleEditClick && (
+          <Button
+            className="w-full bg-blue-500"
+            onClick={gotoEditPage}
+            // disabled={product.stock < 1}
+          >
+            {" "}
+            Edit Product
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

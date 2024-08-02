@@ -23,7 +23,7 @@ const AdminDashboardPage = () => {
   );
   const [bestSellingProduct, setBestSellingProduct] = useState([]);
   const [ordersPayAmount, setOrdersPayAmount] = useState<number | null>(null);
-
+  const [tablePayAmount, setTablePayAmount] = useState<number | null>(null);
   // Function to fetch data from the APIs
   const fetchData = async () => {
     try {
@@ -35,6 +35,7 @@ const AdminDashboardPage = () => {
         tableResponse,
         foodCategoryResponse,
         ordersPayResponse,
+        tablePayResponse,
         bestSellingProductResponse,
       ] = await Promise.all([
         axios.get("/api/admin/dashboard/count/clients"),
@@ -44,6 +45,7 @@ const AdminDashboardPage = () => {
         axios.get("/api/admin/dashboard/count/tables"),
         axios.get("/api/admin/dashboard/count/foodCategories"),
         axios.get("/api/admin/dashboard/amount/orders"),
+        axios.get("/api/admin/dashboard/amount/tables"),
         axios.get("/api/get/best-selling/product"),
       ]);
 
@@ -55,7 +57,8 @@ const AdminDashboardPage = () => {
       setTableCount(tableResponse.data.data);
       setFoodCategoryCount(foodCategoryResponse.data.data);
       setOrdersPayAmount(ordersPayResponse.data.data);
-      setBestSellingProduct(bestSellingProduct.data.data);
+      setTablePayAmount(tablePayResponse.data.data);
+      setBestSellingProduct(bestSellingProductResponse.data.data);
     } catch (error) {
       console.error("Error fetching data:", error);
       showNotification("error", "Failed to fetch dashboard data.");
@@ -75,7 +78,7 @@ const AdminDashboardPage = () => {
   return (
     <div className="space-y-4">
       {/* Pass values to SingleStatic component */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+      <div className="grid grid-cols-4 gap-4 w-full">
         <SingleStatic
           title="Clients Count"
           data={clientCount ?? "Loading..."}
@@ -86,11 +89,19 @@ const AdminDashboardPage = () => {
           title="Product Count"
           data={productCount ?? "Loading..."}
           className="p-4 bg-white shadow rounded"
+          imageSrc="/admin/static1.jpg"
         />
         <SingleStatic
           title="Orders Payment Amount"
           data={`$${ordersPayAmount ?? "Loading..."}`}
           className="p-4 bg-white shadow rounded"
+          imageSrc="/admin/static1.jpg"
+        />
+        <SingleStatic
+          title="Tables Payment Amount"
+          data={`$${tablePayAmount ?? "Loading..."}`}
+          className="p-4 bg-white shadow rounded"
+          imageSrc="/admin/static1.jpg"
         />
       </div>
 

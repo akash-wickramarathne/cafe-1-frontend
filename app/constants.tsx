@@ -8,9 +8,15 @@ export const SIDENAV_ITEMS: SideNavItem[] = [
     icon: <Icon icon="lucide:home" width="24" height="24" />,
   },
   {
-    title: "Products",
-    path: "/admin/products",
+    title: "Product",
+    path: "/admin/product",
     icon: <Icon icon="lucide:home" width="24" height="24" />,
+    submenu: true,
+    subMenuItems: [
+      { title: "All", path: "/admin/products" },
+      { title: "Add Product", path: "/admin/products/add" },
+      { title: "Edit Product", path: "/admin/products/edit" },
+    ],
   },
   {
     title: "Waiters",
@@ -26,17 +32,6 @@ export const SIDENAV_ITEMS: SideNavItem[] = [
     title: "Orders",
     path: "/admin/orders",
     icon: <Icon icon="lucide:home" width="24" height="24" />,
-  },
-  {
-    title: "Projects",
-    path: "/admin/projects",
-    icon: <Icon icon="lucide:folder" width="24" height="24" />,
-    submenu: true,
-    subMenuItems: [
-      { title: "All", path: "/admin/projects" },
-      { title: "Web Design", path: "/admin/projects/web-design" },
-      { title: "Graphic Design", path: "/admin/projects/graphic-design" },
-    ],
   },
   {
     title: "Messages",

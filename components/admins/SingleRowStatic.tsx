@@ -28,14 +28,15 @@ const BestSellingProducts = () => {
   }
   const baseUrl = "http://localhost:8000/storage";
   return (
-    <div className="w-full p-6">
+    <div className="w-full p-6 bg-white shadow-md rounded-lg">
       <h1 className="font-bold text-2xl mb-4">Best Selling Products</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
         {products.map((product) => (
           <ProductCard
             key={product.id}
             title={product.name}
-            imageSrc={`${baseUrl}/${product.foodImages[0]}`} // Use the first image
+            imageSrc={`${baseUrl}/${product.foodImages[0]}`}
+            count={product.orderCount}
           />
         ))}
       </div>
@@ -48,12 +49,14 @@ export default BestSellingProducts;
 const ProductCard = ({
   title,
   imageSrc,
+  count,
 }: {
   title: string;
   imageSrc: string;
+  count: number;
 }) => {
   return (
-    <div className="flex flex-col items-center p-4 bg-white shadow-lg rounded-lg border border-gray-200">
+    <div className="flex flex-col items-center p-4 ">
       {/* Image */}
       <img
         src={imageSrc}
@@ -62,6 +65,7 @@ const ProductCard = ({
       />
       {/* Product Name */}
       <p className="text-lg font-semibold text-center">{title}</p>
+      <p className="text-indigo-600" > Selles Count - {count} </p>
     </div>
   );
 };

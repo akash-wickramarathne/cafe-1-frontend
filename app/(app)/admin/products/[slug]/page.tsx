@@ -2,17 +2,24 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/router";
-import NotFound from "../../notfound";
+import NotFound from "@/app/(app)/notfound";
 
 const Page = ({ params }: { params: { slug: string } }) => {
   //  const router = useRouter();
   const { slug } = params;
 
   // Define your valid slugs here
-  const validSlugs = ["about", "orders"];
+  const validSlugs = ["add"];
 
   if (!validSlugs.includes(slug)) {
-    return <NotFound />;
+    return (
+      <div
+        style={{ height: "calc(100vh - 80px)" }}
+        className="flex justify-center items-center"
+      >
+        <NotFound />
+      </div>
+    );
   }
 
   // Render your actual page content for valid slugs
