@@ -4,7 +4,7 @@ import axios from "@/lib/axios";
 
 export const getBookTables = async () => {
   try {
-    const response = await axios.get("/api/admin/get/book-table");
+    const response = await axios.get("/api/admin/get/book-tables");
     if (!response?.data) {
       throw new Error("Failed to fetch book tables: No data in response");
     }

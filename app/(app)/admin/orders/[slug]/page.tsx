@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "@/lib/axios";
 import { formatDate } from "@/lib/utils";
@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import { truncateText } from "@/lib/text-reduce";
 import { Button } from "@/components/ui/button";
+import DotLoader from "react-spinners/DotLoader";
+import HashLoader from "react-spinners/HashLoader";
 
 interface FoodItem {
   food_item_id: number;
@@ -52,6 +54,13 @@ export default function OrderPage({ params }: { params: { slug: string } }) {
   const [notfound, setNotFound] = useState(false);
   const router = useRouter();
   const orderId = params.slug;
+
+  let [color, setColor] = useState("#D70040");
+  const override: CSSProperties = {
+    display: "block",
+    margin: "0 auto",
+    borderColor: "red",
+  };
 
   const fetchOrders = async () => {
     if (!orderId) return; // Exit if orderId is not set
@@ -110,8 +119,15 @@ export default function OrderPage({ params }: { params: { slug: string } }) {
   return (
     <>
       {loading ? (
-        <div className="flex justify-center items-center">
-          <SkeletonSm length={8} />
+        <div className="flex justify-center items-center h-dvh ">
+          <HashLoader
+            color={color}
+            loading={loading}
+            cssOverride={override}
+            size={150}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          />
         </div>
       ) : (
         <div className="p-4">

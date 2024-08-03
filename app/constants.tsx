@@ -27,6 +27,16 @@ export const SIDENAV_ITEMS: SideNavItem[] = [
     title: "Tables",
     path: "/admin/tables",
     icon: <Icon icon="lucide:home" width="24" height="24" />,
+    submenu: true,
+    subMenuItems: [
+      { title: "All", path: "/admin/tables" },
+      { title: "Add Table", path: "/admin/tables/add" },
+    ],
+  },
+  {
+    title: "Book Tables",
+    path: "/admin/book-tables",
+    icon: <Icon icon="lucide:home" width="24" height="24" />,
   },
   {
     title: "Orders",

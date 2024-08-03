@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, CSSProperties } from "react";
 import { useNotification } from "@/app/_contexts/NotificationContext";
 import AdminLayout from "../layout";
 import { useToast } from "@/components/ui/use-toast";
@@ -7,6 +7,7 @@ import axios from "@/lib/axios";
 import SingleStatic from "@/components/admins/SingleStatic";
 import SingleStaticRow from "@/components/admins/SingleRowStatic";
 import BestSellingProducts from "@/components/admins/SingleRowStatic";
+import RingLoader from "react-spinners/RingLoader";
 
 const AdminDashboardPage = () => {
   const { showNotification } = useNotification();
@@ -24,8 +25,17 @@ const AdminDashboardPage = () => {
   const [bestSellingProduct, setBestSellingProduct] = useState([]);
   const [ordersPayAmount, setOrdersPayAmount] = useState<number | null>(null);
   const [tablePayAmount, setTablePayAmount] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  let [color, setColor] = useState("#D70040");
+  const override: CSSProperties = {
+    display: "block",
+    margin: "0 auto",
+    borderColor: "red",
+  };
   // Function to fetch data from the APIs
   const fetchData = async () => {
+    setLoading(true);
     try {
       const [
         clientResponse,
@@ -62,6 +72,10 @@ const AdminDashboardPage = () => {
     } catch (error) {
       console.error("Error fetching data:", error);
       showNotification("error", "Failed to fetch dashboard data.");
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
     }
   };
 
@@ -76,40 +90,53 @@ const AdminDashboardPage = () => {
   };
 
   return (
-    <div className="space-y-4 animated fadeInDown  ">
-      {/* Pass values to SingleStatic component */}
-      <div className="grid grid-cols-4 gap-4 w-full">
-        <SingleStatic
-          title="Clients Count"
-          data={clientCount ?? "Loading..."}
-          className="p-4 bg-white shadow rounded"
-          imageSrc="/admin/static1.jpg"
-        />
-        <SingleStatic
-          title="Product Count"
-          data={productCount ?? "Loading..."}
-          className="p-4 bg-white shadow rounded"
-          imageSrc="/admin/static1.jpg"
-        />
-        <SingleStatic
-          title="Orders Payment Amount"
-          data={`$${ordersPayAmount ?? "Loading..."}`}
-          className="p-4 bg-white shadow rounded"
-          imageSrc="/admin/static1.jpg"
-        />
-        <SingleStatic
-          title="Tables Payment Amount"
-          data={`$${tablePayAmount ?? "Loading..."}`}
-          className="p-4 bg-white shadow rounded"
-          imageSrc="/admin/static1.jpg"
-        />
-      </div>
+    <>
+      {loading ? (
+        <div className="flex justify-center items-center h-screen">
+          <RingLoader
+            color={color}
+            loading={loading}
+            cssOverride={override}
+            size={150}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          />
+        </div>
+      ) : (
+        <div className="space-y-4 animated fadeInDown  ">
+          {/* Pass values to SingleStatic component */}
+          <div className="grid grid-cols-4 gap-4 w-full">
+            <SingleStatic
+              title="Clients Count"
+              data={clientCount ?? "Loading..."}
+              className="p-4 bg-white shadow rounded"
+              imageSrc="/admin/static1.jpg"
+            />
+            <SingleStatic
+              title="Product Count"
+              data={productCount ?? "Loading..."}
+              className="p-4 bg-white shadow rounded"
+              imageSrc="/admin/static1.jpg"
+            />
+            <SingleStatic
+              title="Orders Payment Amount"
+              data={`$${ordersPayAmount ?? "Loading..."}`}
+              className="p-4 bg-white shadow rounded"
+              imageSrc="/admin/static1.jpg"
+            />
+            <SingleStatic
+              title="Tables Payment Amount"
+              data={`$${tablePayAmount ?? "Loading..."}`}
+              className="p-4 bg-white shadow rounded"
+              imageSrc="/admin/static1.jpg"
+            />
+          </div>
 
-      <div className="grid grid-cols-1">
-        <BestSellingProducts />
-      </div>
+          <div className="grid grid-cols-1">
+            <BestSellingProducts />
+          </div>
 
-      {/* <button
+          {/* <button
         onClick={handleClick}
         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
       >
@@ -126,7 +153,9 @@ const AdminDashboardPage = () => {
         <p>Food Categories Count: {foodCategoryCount ?? "Loading..."}</p>
         <p>Orders Payment Amount: ${ordersPayAmount ?? "Loading..."}</p>
       </div> */}
-    </div>
+        </div>
+      )}
+    </>
   );
 };
 
