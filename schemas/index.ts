@@ -237,19 +237,28 @@ export const getCartSchema = z.object({
 //  stock: z.number().min(0, "Stock must be a non-negative integer"),
 // });
 
-
 export const formSchema = z.object({
   date: z.string().nonempty("Date is required"),
   startTime: z.string().nonempty("Start time is required"),
-  endTime: z.string().nonempty("End time is required").refine((val, ctx) => {
-    const { startTime } = ctx.parent;
-    if (val <= startTime) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "End time must be later than start time",
-      });
-      return false;
-    }
-    return true;
-  }),
+  endTime: z
+    .string()
+    .nonempty("End time is required")
+    .refine((val, ctx) => {
+      const { startTime } = ctx.parent;
+      if (val <= startTime) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "End time must be later than start time",
+        });
+        return false;
+      }
+      return true;
+    }),
+});
+
+export const AddTableSchema = z.object({
+  name: z.string().min(1, "Table name is required"),
+  size_id: z.number().min(1, "Size ID must be a positive number"),
+  status_id: z.number().min(1, "Status ID must be a positive number"),
+  seats: z.number().min(1, "Seats must be a positive number"),
 });

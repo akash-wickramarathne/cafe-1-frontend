@@ -300,7 +300,7 @@ export default function EditProduct({
                       setProductImages(newFiles); // Update to the newly uploaded files
                       setUploadedImageUrls(existingImages); // Keep existing image URLs
                     }}
-                    defaultImages={uploadedImageUrls}
+                    //   defaultImages={uploadedImageUrls}
                   />
                 </div>
                 <Button

@@ -76,6 +76,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    console.log("useEffect triggered");
     fetchCategories();
   }, []);
 
@@ -141,6 +142,8 @@ export default function Dashboard() {
   };
 
   const handleImageUpload = async () => {
+    console.log("handleImageUpload triggered");
+
     try {
       setIsPending(true);
 
